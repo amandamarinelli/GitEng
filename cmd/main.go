@@ -4,12 +4,13 @@ import (
 	"log"
 	"os"
 
+	"github.com/amandamarinelli/GitEng/internal/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 const gitClientIdName = "GITHUB_CLIENT_ID"
-const gitSecretName = "GITHUB_CLIENT_ID"
+const gitSecretName = "GITHUB_CLIENT_SECRET"
 
 func main() {
 	// Load environment variables from .env file
@@ -24,6 +25,8 @@ func main() {
 	if gitClientId == "" || gitSecret == "" {
 		panic("GitHub client ID or secret not set in environment variables")
 	}
+	// Initialize Clients
+	auth := auth.NewGitHubClient(gitClientId, gitSecret)
 
 	// Initialize Router
 	router := gin.Default()
@@ -32,6 +35,9 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	router.GET("/auth/github/login", auth.GithubLogin)
+	router.GET("/auth/github/callback", auth.GithubCallback)
 
 	// Start server
 	err = router.Run()
